@@ -40,14 +40,6 @@ export default function Home() {
               </div>
               <div className="flex items-center gap-2">
                 <ThemeToggle />
-                <Button size="sm" onClick={() => setScanDialogOpen(true)}>
-                  <Nfc />
-                  <span className="hidden sm:inline">Scan Tag</span>
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => setAddDialogOpen(true)}>
-                  <Plus />
-                  <span className="hidden sm:inline">New Container</span>
-                </Button>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-9 w-9">
@@ -99,17 +91,32 @@ export default function Home() {
             <div className="text-center py-16 border-2 border-dashed rounded-lg">
               <Boxes className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-4 text-lg font-medium text-primary">No containers yet</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Get started by creating a new container.</p>
-              <div className="mt-6">
-                <Button onClick={() => setAddDialogOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Container
-                </Button>
-              </div>
+              <p className="mt-1 text-sm text-muted-foreground">Tap the plus button below to create your first container.</p>
             </div>
           )}
         </main>
       </div>
+
+      <div className="fixed bottom-6 right-6 z-20 flex flex-col items-center gap-4">
+        <Button 
+            variant="secondary"
+            size="icon"
+            className="rounded-full h-14 w-14 shadow-lg"
+            onClick={() => setScanDialogOpen(true)}
+            aria-label="Scan Tag"
+        >
+            <Nfc className="h-6 w-6" />
+        </Button>
+        <Button 
+            size="icon"
+            className="rounded-full h-16 w-16 shadow-lg"
+            onClick={() => setAddDialogOpen(true)}
+            aria-label="Add New Container"
+        >
+            <Plus className="h-8 w-8" />
+        </Button>
+      </div>
+
       <AddContainerDialog open={isAddDialogOpen} onOpenChange={setAddDialogOpen} />
       <ScanTagDialog open={isScanDialogOpen} onOpenChange={setScanDialogOpen} />
       <DeleteAllDialog open={isDeleteAllDialogOpen} onOpenChange={setDeleteAllDialogOpen} />
