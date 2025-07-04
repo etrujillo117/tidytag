@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useContainer } from "@/context/ContainerContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, PackageOpen, PackagePlus, Boxes, Nfc } from "lucide-react";
+import { ArrowLeft, Plus, PackageOpen, PackagePlus, Boxes, Nfc, FileDown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ItemCard } from "@/components/ItemCard";
 import { AddItemSheet } from "@/components/AddItemSheet";
@@ -13,11 +13,15 @@ import { AddContainerDialog } from "@/components/AddContainerDialog";
 import { ContainerCard } from "@/components/ContainerCard";
 import { LinkNfcDialog } from "@/components/LinkNfcDialog";
 import type { Container } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
+import * as Papa from 'papaparse';
+
 
 export default function ContainerPage() {
   const params = useParams();
   const router = useRouter();
-  const { getContainerById, getChildContainers, loading } = useContainer();
+  const { getContainerById, getChildContainers, loading, containers } = useContainer();
+  const { toast } = useToast();
   const [isAddItemSheetOpen, setAddItemSheetOpen] = useState(false);
   const [isAddContainerDialogOpen, setAddContainerDialogOpen] = useState(false);
   const [isLinkNfcDialogOpen, setLinkNfcDialogOpen] = useState(false);
@@ -25,6 +29,49 @@ export default function ContainerPage() {
   const containerId = typeof params.id === 'string' ? params.id : '';
   const container = getContainerById(containerId);
   const childContainers = container ? getChildContainers(container.id) : [];
+
+  const handleExport = () => {
+    if (!container) return;
+
+    let dataToExport;
+    const filename = `${container.name.replace(/\s/g, '_')}_export.csv`;
+
+    if (container.allowedContentType === 'items') {
+      if (container.items.length === 0) {
+        toast({ title: "Nothing to Export", description: "This container is empty." });
+        return;
+      }
+      dataToExport = container.items.map(item => ({
+        "Name": item.name,
+        "Quantity": item.quantity,
+        "Date Added": new Date(item.createdAt).toLocaleDateString(),
+      }));
+    } else {
+      if (childContainers.length === 0) {
+        toast({ title: "Nothing to Export", description: "This container has no sub-containers." });
+        return;
+      }
+      dataToExport = childContainers.map(child => ({
+        "Container Name": child.name,
+        "Contents Count": child.allowedContentType === 'items' 
+          ? child.items.length 
+          : getChildContainers(child.id).length,
+        "Date Added": new Date(child.createdAt).toLocaleDateString(),
+      }));
+    }
+
+    const csv = Papa.unparse(dataToExport);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({ title: "Export Successful", description: "Your CSV file has been downloaded." });
+  };
+
 
   if (loading) {
     return <ContainerSkeleton />;
@@ -76,6 +123,10 @@ export default function ContainerPage() {
                 </h1>
               </div>
               <div className="flex items-center gap-2">
+                 <Button variant="outline" size="sm" onClick={handleExport}>
+                  <FileDown className="mr-2 h-4 w-4" />
+                  Export CSV
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => setLinkNfcDialogOpen(true)}>
                   <Nfc className="mr-2 h-4 w-4" />
                   {container.nfcId ? 'Edit' : 'Link'} Tag

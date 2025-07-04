@@ -39,7 +39,29 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
     try {
       const storedContainers = localStorage.getItem(STORAGE_KEY);
       if (storedContainers) {
-        setContainers(JSON.parse(storedContainers));
+        const parsed = JSON.parse(storedContainers);
+        // Migration logic for backward compatibility with older data structures
+        const migrated = parsed.map((c: any) => {
+            const now = new Date().toISOString();
+            const newContainer: Container = {
+                ...c,
+                createdAt: c.createdAt || now,
+                updatedAt: c.updatedAt || now,
+                items: (c.items || []).map((i: any) => {
+                    const newItem: Item = {
+                        ...i,
+                        createdAt: i.createdAt || i.addedAt || now,
+                        updatedAt: i.updatedAt || i.addedAt || now,
+                    };
+                    if (newItem.hasOwnProperty('addedAt')) {
+                      delete (newItem as any).addedAt;
+                    }
+                    return newItem;
+                })
+            };
+            return newContainer;
+        });
+        setContainers(migrated);
       }
     } catch (error) {
       console.error('Failed to load containers from local storage', error);
@@ -81,14 +103,26 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
   }, [containers]);
 
   const addContainer = (name: string, allowedContentType: 'items' | 'containers', parentId?: string) => {
+    const now = new Date().toISOString();
     const newContainer: Container = {
       id: crypto.randomUUID(),
       name,
       items: [],
       allowedContentType,
       parentId,
+      createdAt: now,
+      updatedAt: now,
     };
-    setContainers(prev => [...prev, newContainer]);
+
+    setContainers(prev => {
+        let updatedContainers = [...prev, newContainer];
+        if (parentId) {
+            updatedContainers = updatedContainers.map(c => 
+                c.id === parentId ? { ...c, updatedAt: new Date().toISOString() } : c
+            );
+        }
+        return updatedContainers;
+    });
     toast({
       title: 'Container Created',
       description: `"${name}" has been added.`,
@@ -105,8 +139,19 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
         });
         return;
     }
-    const containerName = containers.find(c => c.id === id)?.name;
-    setContainers(prev => prev.filter(c => c.id !== id));
+    const containerToRemove = containers.find(c => c.id === id);
+    const containerName = containerToRemove?.name;
+
+    setContainers(prev => {
+        let updatedContainers = prev.filter(c => c.id !== id);
+        if (containerToRemove?.parentId) {
+            updatedContainers = updatedContainers.map(c => 
+                c.id === containerToRemove.parentId ? { ...c, updatedAt: new Date().toISOString() } : c
+            );
+        }
+        return updatedContainers;
+    });
+
     toast({
       title: 'Container Removed',
       description: `"${containerName}" has been removed.`,
@@ -125,13 +170,15 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    const now = new Date().toISOString();
     const newItem: Item = {
       id: crypto.randomUUID(),
       ...itemData,
-      addedAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
     };
     setContainers(prev => prev.map(c => 
-      c.id === containerId ? { ...c, items: [...c.items, newItem] } : c
+      c.id === containerId ? { ...c, items: [...c.items, newItem], updatedAt: now } : c
     ));
     toast({
       title: 'Item Added',
@@ -145,7 +192,7 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
       if (c.id === containerId) {
         const item = c.items.find(i => i.id === itemId);
         if (item) itemName = item.name;
-        return { ...c, items: c.items.filter(i => i.id !== itemId) };
+        return { ...c, items: c.items.filter(i => i.id !== itemId), updatedAt: new Date().toISOString() };
       }
       return c;
     }));
@@ -158,14 +205,16 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
 
   const updateItem = (containerId: string, itemId: string, updates: Partial<Pick<Item, 'name' | 'quantity' | 'imageUrl'>>) => {
     let itemName = '';
+    const now = new Date().toISOString();
     setContainers(prev => prev.map(c => {
       if (c.id === containerId) {
         return {
           ...c,
+          updatedAt: now,
           items: c.items.map(i => {
             if (i.id === itemId) {
               itemName = updates.name || i.name;
-              return { ...i, ...updates, addedAt: new Date().toISOString() };
+              return { ...i, ...updates, updatedAt: now };
             }
             return i;
           })
@@ -196,7 +245,7 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
     setContainers(prev => prev.map(c => {
       if (c.id === containerId) {
         containerName = c.name;
-        return { ...c, nfcId: nfcId || undefined };
+        return { ...c, nfcId: nfcId || undefined, updatedAt: new Date().toISOString() };
       }
       return c;
     }));

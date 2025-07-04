@@ -19,7 +19,7 @@ export function ItemCard({ item, containerId }: ItemCardProps) {
   const { removeItem } = useContainer();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const formattedDate = formatDistanceToNow(new Date(item.addedAt), { addSuffix: true });
+  const formattedDate = formatDistanceToNow(new Date(item.createdAt), { addSuffix: true });
 
   return (
     <>

@@ -3,7 +3,8 @@ export interface Item {
   name: string;
   quantity: number;
   imageUrl?: string;
-  addedAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Container {
@@ -13,4 +14,6 @@ export interface Container {
   nfcId?: string;
   parentId?: string;
   allowedContentType: 'items' | 'containers';
+  createdAt: string;
+  updatedAt: string;
 }
