@@ -9,6 +9,7 @@ import { RemoveConfirmationDialog } from '@/components/RemoveConfirmationDialog'
 import { useContainer } from '@/context/ContainerContext';
 import type { Item } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
+import { Logo } from './Logo';
 
 interface ItemCardProps {
   item: Item;
@@ -25,15 +26,19 @@ export function ItemCard({ item, containerId }: ItemCardProps) {
     <>
       <Card className="flex flex-col h-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
         <CardContent className="p-0 flex-grow">
-          <div className="aspect-square w-full bg-secondary overflow-hidden">
-             <Image
-              src={item.imageUrl || `https://placehold.co/400x400.png`}
-              alt={item.name}
-              width={400}
-              height={400}
-              className="w-full h-full object-cover"
-              data-ai-hint={`${item.name.split(' ').slice(0,2).join(' ')}`}
-            />
+          <div className="aspect-square w-full bg-secondary overflow-hidden flex items-center justify-center">
+             {item.imageUrl ? (
+                <Image
+                  src={item.imageUrl}
+                  alt={item.name}
+                  width={400}
+                  height={400}
+                  className="w-full h-full object-cover"
+                  data-ai-hint={`${item.name.split(' ').slice(0,2).join(' ')}`}
+                />
+              ) : (
+                <Logo className="h-16 w-16 text-primary/20" />
+              )}
           </div>
           <div className="p-4">
             <CardTitle className="text-lg font-headline break-words">{item.name}</CardTitle>
