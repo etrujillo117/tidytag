@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Card, CardContent, CardDescription, CardFooter, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Minus, Plus, Trash2 } from 'lucide-react';
 import { RemoveConfirmationDialog } from '@/components/RemoveConfirmationDialog';
 import { useContainer } from '@/context/ContainerContext';
 import type { Item } from '@/lib/types';
@@ -17,10 +17,20 @@ interface ItemCardProps {
 }
 
 export function ItemCard({ item, containerId }: ItemCardProps) {
-  const { removeItem } = useContainer();
+  const { removeItem, updateItem } = useContainer();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const formattedDate = formatDistanceToNow(new Date(item.createdAt), { addSuffix: true });
+  const handleIncrease = () => {
+    updateItem(containerId, item.id, { quantity: item.quantity + 1 }, true);
+  };
+
+  const handleDecrease = () => {
+    if (item.quantity > 1) {
+      updateItem(containerId, item.id, { quantity: item.quantity - 1 }, false);
+    }
+  };
+
+  const formattedDate = formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true });
 
   return (
     <>
@@ -40,22 +50,32 @@ export function ItemCard({ item, containerId }: ItemCardProps) {
                 <Logo className="h-16 w-16 text-primary/20" />
               )}
           </div>
-          <div className="p-4">
+          <div className="p-4 pb-0">
             <CardTitle className="text-lg font-headline break-words">{item.name}</CardTitle>
-            <CardDescription className="pt-1">Quantity: {item.quantity}</CardDescription>
-             <CardDescription className="pt-1 text-xs">Added {formattedDate}</CardDescription>
+            <CardDescription className="pt-1 text-xs">Updated {formattedDate}</CardDescription>
           </div>
         </CardContent>
-        <CardFooter className="p-4 pt-0">
-          <Button
-            variant="destructive"
-            size="sm"
-            className="w-full"
+        <CardFooter className="p-4 pt-2 flex items-center justify-between">
+           <Button
+            variant="ghost"
+            size="icon"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 w-8"
             onClick={() => setDeleteDialogOpen(true)}
+            aria-label="Remove item"
           >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Remove
+            <Trash2 className="h-4 w-4" />
           </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleDecrease} disabled={item.quantity <= 1}>
+                <Minus className="h-4 w-4" />
+                <span className="sr-only">Decrease quantity</span>
+            </Button>
+            <span className="font-bold text-lg w-10 text-center tabular-nums" aria-live="polite">{item.quantity}</span>
+            <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleIncrease}>
+                <Plus className="h-4 w-4" />
+                <span className="sr-only">Increase quantity</span>
+            </Button>
+          </div>
         </CardFooter>
       </Card>
       <RemoveConfirmationDialog
@@ -63,7 +83,7 @@ export function ItemCard({ item, containerId }: ItemCardProps) {
         onOpenChange={setDeleteDialogOpen}
         onConfirm={() => removeItem(containerId, item.id)}
         title={`Remove ${item.name}?`}
-        description={`Are you sure you want to remove ${item.quantity} x "${item.name}" from this container?`}
+        description={`Are you sure you want to remove ${item.quantity} x "${item.name}" from this container? This will remove all quantities of this item.`}
       />
     </>
   );

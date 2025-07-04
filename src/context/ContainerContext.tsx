@@ -16,7 +16,7 @@ interface ContainerContextType {
   removeContainer: (id: string) => void;
   addItem: (containerId: string, itemData: { name: string; quantity: number, imageUrl?: string }) => void;
   removeItem: (containerId: string, itemId: string) => void;
-  updateItem: (containerId: string, itemId: string, updates: Partial<Pick<Item, 'name' | 'quantity' | 'imageUrl'>>) => void;
+  updateItem: (containerId: string, itemId: string, updates: Partial<Pick<Item, 'name' | 'quantity' | 'imageUrl'>>, updateDate?: boolean) => void;
   linkNfcTag: (containerId: string, nfcId: string) => void;
   deleteAllData: () => void;
 }
@@ -204,7 +204,7 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const updateItem = (containerId: string, itemId: string, updates: Partial<Pick<Item, 'name' | 'quantity' | 'imageUrl'>>) => {
+  const updateItem = (containerId: string, itemId: string, updates: Partial<Pick<Item, 'name' | 'quantity' | 'imageUrl'>>, updateDate = true) => {
     let itemName = '';
     const now = new Date().toISOString();
     setContainers(prev => prev.map(c => {
@@ -215,7 +215,11 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
           items: c.items.map(i => {
             if (i.id === itemId) {
               itemName = updates.name || i.name;
-              return { ...i, ...updates, updatedAt: now };
+              const updatedItem = { ...i, ...updates };
+              if (updateDate) {
+                updatedItem.updatedAt = now;
+              }
+              return updatedItem;
             }
             return i;
           })
@@ -223,10 +227,18 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
       }
       return c;
     }));
-     toast({
-      title: 'Item Updated',
-      description: `"${itemName}" has been updated.`,
-    });
+
+    if (updates.quantity) {
+      toast({
+        title: 'Quantity Updated',
+        description: `Quantity for "${itemName}" is now ${updates.quantity}.`,
+      });
+    } else {
+      toast({
+        title: 'Item Updated',
+        description: `"${itemName}" has been updated.`,
+      });
+    }
   };
 
   const linkNfcTag = (containerId: string, nfcId: string) => {
