@@ -124,22 +124,22 @@ export default function ContainerPage() {
               </div>
               <div className="flex items-center gap-2">
                  <Button variant="outline" size="sm" onClick={handleExport}>
-                  <FileDown className="mr-2 h-4 w-4" />
-                  Export CSV
+                  <FileDown />
+                  <span className="hidden sm:inline">Export CSV</span>
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setLinkNfcDialogOpen(true)}>
-                  <Nfc className="mr-2 h-4 w-4" />
-                  {container.nfcId ? 'Edit' : 'Link'} Tag
+                  <Nfc />
+                  <span className="hidden sm:inline">{container.nfcId ? 'Edit' : 'Link'} Tag</span>
                 </Button>
                 {container.allowedContentType === 'items' ? (
                   <Button size="sm" onClick={() => setAddItemSheetOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Item
+                    <Plus />
+                    <span className="hidden sm:inline">Add Item</span>
                   </Button>
                 ) : (
                   <Button size="sm" onClick={() => setAddContainerDialogOpen(true)}>
-                    <Boxes className="mr-2 h-4 w-4" />
-                    New Sub-Container
+                    <Boxes />
+                    <span className="hidden sm:inline">New Sub-Container</span>
                   </Button>
                 )}
               </div>

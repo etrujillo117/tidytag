@@ -33,12 +33,12 @@ export default function Home() {
               <div className="flex items-center gap-2">
                 <ThemeToggle />
                 <Button size="sm" onClick={() => setScanDialogOpen(true)}>
-                  <Nfc className="mr-2 h-4 w-4" />
-                  Scan Tag
+                  <Nfc />
+                  <span className="hidden sm:inline">Scan Tag</span>
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => setAddDialogOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  New Container
+                  <Plus />
+                  <span className="hidden sm:inline">New Container</span>
                 </Button>
               </div>
             </div>
