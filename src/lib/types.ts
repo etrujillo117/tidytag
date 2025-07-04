@@ -10,4 +10,7 @@ export interface Container {
   id: string;
   name: string;
   items: Item[];
+  nfcId?: string;
+  parentId?: string;
+  allowedContentType: 'items' | 'containers';
 }

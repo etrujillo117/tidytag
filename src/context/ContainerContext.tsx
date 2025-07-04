@@ -10,11 +10,14 @@ interface ContainerContextType {
   containers: Container[];
   loading: boolean;
   getContainerById: (id: string) => Container | undefined;
-  addContainer: (name: string) => void;
+  getContainerByNfcId: (nfcId: string) => Container | undefined;
+  getChildContainers: (parentId: string) => Container[];
+  addContainer: (name: string, allowedContentType: 'items' | 'containers', parentId?: string) => void;
   removeContainer: (id: string) => void;
   addItem: (containerId: string, itemData: { name: string; quantity: number, imageUrl?: string }) => void;
   removeItem: (containerId: string, itemId: string) => void;
   updateItem: (containerId: string, itemId: string, updates: Partial<Pick<Item, 'name' | 'quantity' | 'imageUrl'>>) => void;
+  linkNfcTag: (containerId: string, nfcId: string) => void;
 }
 
 const ContainerContext = createContext<ContainerContextType | undefined>(undefined);
@@ -68,12 +71,22 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
   const getContainerById = useCallback((id: string) => {
     return containers.find(c => c.id === id);
   }, [containers]);
+  
+  const getContainerByNfcId = useCallback((nfcId: string) => {
+    return containers.find(c => c.nfcId === nfcId);
+  }, [containers]);
 
-  const addContainer = (name: string) => {
+  const getChildContainers = useCallback((parentId: string) => {
+    return containers.filter(c => c.parentId === parentId);
+  }, [containers]);
+
+  const addContainer = (name: string, allowedContentType: 'items' | 'containers', parentId?: string) => {
     const newContainer: Container = {
       id: crypto.randomUUID(),
       name,
       items: [],
+      allowedContentType,
+      parentId,
     };
     setContainers(prev => [...prev, newContainer]);
     toast({
@@ -83,6 +96,15 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const removeContainer = (id: string) => {
+    const childContainers = containers.filter(c => c.parentId === id);
+    if (childContainers.length > 0) {
+        toast({
+            title: 'Cannot Remove Container',
+            description: 'This container has other containers inside it. Please empty it first.',
+            variant: 'destructive',
+        });
+        return;
+    }
     const containerName = containers.find(c => c.id === id)?.name;
     setContainers(prev => prev.filter(c => c.id !== id));
     toast({
@@ -93,6 +115,16 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addItem = (containerId: string, itemData: { name: string; quantity: number, imageUrl?: string }) => {
+    const container = getContainerById(containerId);
+    if (container?.allowedContentType !== 'items') {
+      toast({
+        title: 'Action Not Allowed',
+        description: 'Items can only be added to item containers.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     const newItem: Item = {
       id: crypto.randomUUID(),
       ...itemData,
@@ -147,16 +179,46 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const linkNfcTag = (containerId: string, nfcId: string) => {
+    if (nfcId) {
+      const tagExists = containers.some(c => c.nfcId === nfcId && c.id !== containerId);
+      if (tagExists) {
+        toast({
+          title: 'NFC Tag In Use',
+          description: 'This NFC tag ID is already assigned to another container.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
+    let containerName = '';
+    setContainers(prev => prev.map(c => {
+      if (c.id === containerId) {
+        containerName = c.name;
+        return { ...c, nfcId: nfcId || undefined };
+      }
+      return c;
+    }));
+    toast({
+      title: nfcId ? 'NFC Tag Linked' : 'NFC Tag Unlinked',
+      description: nfcId ? `Tag linked to "${containerName}".` : `Tag unlinked from "${containerName}".`,
+    });
+  };
+
 
   const value = {
     containers,
     loading,
     getContainerById,
+    getContainerByNfcId,
+    getChildContainers,
     addContainer,
     removeContainer,
     addItem,
     removeItem,
     updateItem,
+    linkNfcTag,
   };
 
   return (

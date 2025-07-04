@@ -2,23 +2,29 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useContainer } from "@/context/ContainerContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, PackageOpen, PackagePlus } from "lucide-react";
+import { ArrowLeft, Plus, PackageOpen, PackagePlus, Boxes, Nfc } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
 import { ItemCard } from "@/components/ItemCard";
 import { AddItemSheet } from "@/components/AddItemSheet";
+import { AddContainerDialog } from "@/components/AddContainerDialog";
+import { ContainerCard } from "@/components/ContainerCard";
+import { LinkNfcDialog } from "@/components/LinkNfcDialog";
 import type { Container } from "@/lib/types";
 
 export default function ContainerPage() {
   const params = useParams();
   const router = useRouter();
-  const { getContainerById, loading } = useContainer();
+  const { getContainerById, getChildContainers, loading } = useContainer();
   const [isAddItemSheetOpen, setAddItemSheetOpen] = useState(false);
+  const [isAddContainerDialogOpen, setAddContainerDialogOpen] = useState(false);
+  const [isLinkNfcDialogOpen, setLinkNfcDialogOpen] = useState(false);
 
   const containerId = typeof params.id === 'string' ? params.id : '';
   const container = getContainerById(containerId);
+  const childContainers = container ? getChildContainers(container.id) : [];
 
   if (loading) {
     return <ContainerSkeleton />;
@@ -40,54 +46,114 @@ export default function ContainerPage() {
     );
   }
 
+  const parentContainer = container.parentId ? getContainerById(container.parentId) : null;
+  const breadcrumbs = parentContainer ? (
+    <Button variant="link" asChild className="text-muted-foreground p-0 h-auto">
+      <Link href={parentContainer ? `/container/${parentContainer.id}` : '/'}>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to "{parentContainer.name}"
+      </Link>
+    </Button>
+  ) : (
+    <Button variant="ghost" size="icon" asChild>
+      <Link href="/">
+        <ArrowLeft />
+        <span className="sr-only">Back</span>
+      </Link>
+    </Button>
+  );
+
   return (
     <>
       <div className="min-h-screen">
         <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
-              <Button variant="ghost" size="icon" asChild>
-                <Link href="/">
-                  <ArrowLeft />
-                  <span className="sr-only">Back</span>
-                </Link>
-              </Button>
-              <h1 className="text-xl font-bold font-headline text-primary truncate">
-                {container.name}
-              </h1>
-              <Button size="sm" onClick={() => setAddItemSheetOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Item
-              </Button>
+              <div className="flex items-center gap-4">
+                {breadcrumbs}
+                <h1 className="text-xl font-bold font-headline text-primary truncate">
+                  {container.name}
+                </h1>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => setLinkNfcDialogOpen(true)}>
+                  <Nfc className="mr-2 h-4 w-4" />
+                  {container.nfcId ? 'Edit' : 'Link'} Tag
+                </Button>
+                {container.allowedContentType === 'items' ? (
+                  <Button size="sm" onClick={() => setAddItemSheetOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Item
+                  </Button>
+                ) : (
+                  <Button size="sm" onClick={() => setAddContainerDialogOpen(true)}>
+                    <Boxes className="mr-2 h-4 w-4" />
+                    New Sub-Container
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </header>
 
         <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {container.items.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {container.items.map(item => (
-                <ItemCard key={item.id} item={item} containerId={container.id} />
-              ))}
-            </div>
-          ) : (
-             <div className="text-center py-16 border-2 border-dashed rounded-lg mt-8">
-              <PackagePlus className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-4 text-lg font-medium text-primary">This container is empty</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Add your first item to get started.</p>
-              <div className="mt-6">
-                <Button onClick={() => setAddItemSheetOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Item
-                </Button>
+          {container.allowedContentType === 'items' && (
+            container.items.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {container.items.map(item => (
+                  <ItemCard key={item.id} item={item} containerId={container.id} />
+                ))}
               </div>
-            </div>
+            ) : (
+               <div className="text-center py-16 border-2 border-dashed rounded-lg mt-8">
+                <PackagePlus className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h3 className="mt-4 text-lg font-medium text-primary">This container is empty</h3>
+                <p className="mt-1 text-sm text-muted-foreground">Add your first item to get started.</p>
+                <div className="mt-6">
+                  <Button onClick={() => setAddItemSheetOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Item
+                  </Button>
+                </div>
+              </div>
+            )
+          )}
+           {container.allowedContentType === 'containers' && (
+            childContainers.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {childContainers.map(child => (
+                  <ContainerCard key={child.id} container={child} />
+                ))}
+              </div>
+            ) : (
+               <div className="text-center py-16 border-2 border-dashed rounded-lg mt-8">
+                <Boxes className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h3 className="mt-4 text-lg font-medium text-primary">This container is empty</h3>
+                <p className="mt-1 text-sm text-muted-foreground">Add your first sub-container to get started.</p>
+                <div className="mt-6">
+                  <Button onClick={() => setAddContainerDialogOpen(true)}>
+                    <Boxes className="mr-2 h-4 w-4" />
+                    Add Sub-Container
+                  </Button>
+                </div>
+              </div>
+            )
           )}
         </main>
       </div>
       <AddItemSheet
         open={isAddItemSheetOpen}
         onOpenChange={setAddItemSheetOpen}
+        container={container}
+      />
+      <AddContainerDialog 
+        open={isAddContainerDialogOpen}
+        onOpenChange={setAddContainerDialogOpen}
+        parentId={container.id}
+      />
+      <LinkNfcDialog 
+        open={isLinkNfcDialogOpen}
+        onOpenChange={setLinkNfcDialogOpen}
         container={container}
       />
     </>
@@ -102,7 +168,10 @@ function ContainerSkeleton() {
           <div className="flex items-center justify-between h-16">
             <Skeleton className="h-10 w-10 rounded-md" />
             <Skeleton className="h-6 w-48 rounded-md" />
-            <Skeleton className="h-9 w-28 rounded-md" />
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-9 w-28 rounded-md" />
+              <Skeleton className="h-9 w-28 rounded-md" />
+            </div>
           </div>
         </div>
       </header>

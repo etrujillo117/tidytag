@@ -16,6 +16,8 @@ export default function Home() {
   const [isAddDialogOpen, setAddDialogOpen] = useState(false);
   const [isScanDialogOpen, setScanDialogOpen] = useState(false);
 
+  const rootContainers = containers.filter(c => !c.parentId);
+
   return (
     <>
       <div className="flex flex-col min-h-screen">
@@ -65,9 +67,9 @@ export default function Home() {
                 </div>
               ))}
             </div>
-          ) : containers.length > 0 ? (
+          ) : rootContainers.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {containers.map((container) => (
+              {rootContainers.map((container) => (
                 <ContainerCard key={container.id} container={container} />
               ))}
             </div>

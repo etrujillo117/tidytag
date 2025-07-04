@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MoreVertical, Trash2, Box, Package } from 'lucide-react';
+import { MoreVertical, Trash2, Box, Package, Boxes } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { RemoveConfirmationDialog } from '@/components/RemoveConfirmationDialog';
 import { useContainer } from '@/context/ContainerContext';
@@ -15,8 +15,10 @@ interface ContainerCardProps {
 }
 
 export function ContainerCard({ container }: ContainerCardProps) {
-  const { removeContainer } = useContainer();
+  const { removeContainer, containers } = useContainer();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const childContainers = containers.filter(c => c.parentId === container.id);
 
   return (
     <>
@@ -25,14 +27,27 @@ export function ContainerCard({ container }: ContainerCardProps) {
           <CardHeader className="flex flex-row items-start gap-4 space-y-0 pb-4">
             <div className="flex-shrink-0">
               <div className="bg-secondary p-3 rounded-full">
-                <Box className="h-6 w-6 text-primary" />
+                 {container.allowedContentType === 'items' ? (
+                  <Box className="h-6 w-6 text-primary" />
+                ) : (
+                  <Boxes className="h-6 w-6 text-primary" />
+                )}
               </div>
             </div>
             <div className="flex-grow">
               <CardTitle className="truncate font-headline">{container.name}</CardTitle>
               <CardDescription className="flex items-center gap-1.5 pt-1">
-                <Package className="w-4 h-4" />
-                {container.items.length} item{container.items.length !== 1 ? 's' : ''}
+                 {container.allowedContentType === 'items' ? (
+                  <>
+                    <Package className="w-4 h-4" />
+                    {container.items.length} item{container.items.length !== 1 ? 's' : ''}
+                  </>
+                ) : (
+                  <>
+                    <Boxes className="w-4 h-4" />
+                    {childContainers.length} container{childContainers.length !== 1 ? 's' : ''}
+                  </>
+                )}
               </CardDescription>
             </div>
           </CardHeader>
@@ -59,7 +74,7 @@ export function ContainerCard({ container }: ContainerCardProps) {
         onOpenChange={setDeleteDialogOpen}
         onConfirm={() => removeContainer(container.id)}
         title={`Delete "${container.name}"?`}
-        description="This will permanently delete the container and all items inside it. This action cannot be undone."
+        description="This will permanently delete the container and all its contents. This action cannot be undone."
       />
     </>
   );
