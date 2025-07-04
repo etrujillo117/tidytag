@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Nfc, Plus, Boxes, MoreVertical, Trash2 } from "lucide-react";
+import { Nfc, Plus, Boxes, MoreVertical, Trash2, Search } from "lucide-react";
 import { useContainer } from "@/context/ContainerContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ContainerCard } from "@/components/ContainerCard";
@@ -17,12 +18,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DeleteAllDialog } from "@/components/DeleteAllDialog";
+import { SearchDialog } from "@/components/SearchDialog";
 
 export default function Home() {
   const { containers, loading } = useContainer();
   const [isAddDialogOpen, setAddDialogOpen] = useState(false);
   const [isScanDialogOpen, setScanDialogOpen] = useState(false);
   const [isDeleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
+  const [isSearchDialogOpen, setSearchDialogOpen] = useState(false);
 
   const rootContainers = containers.filter(c => !c.parentId);
 
@@ -39,6 +42,10 @@ export default function Home() {
                 </h1>
               </div>
               <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setSearchDialogOpen(true)}>
+                    <Search />
+                    <span className="sr-only">Search Items</span>
+                </Button>
                 <ThemeToggle />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -120,6 +127,7 @@ export default function Home() {
       <AddContainerDialog open={isAddDialogOpen} onOpenChange={setAddDialogOpen} />
       <ScanTagDialog open={isScanDialogOpen} onOpenChange={setScanDialogOpen} />
       <DeleteAllDialog open={isDeleteAllDialogOpen} onOpenChange={setDeleteAllDialogOpen} />
+      <SearchDialog open={isSearchDialogOpen} onOpenChange={setSearchDialogOpen} />
     </>
   );
 }

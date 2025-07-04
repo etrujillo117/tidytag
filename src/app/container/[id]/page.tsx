@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useContainer } from "@/context/ContainerContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, PackageOpen, PackagePlus, Boxes, Nfc, FileDown, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, PackageOpen, PackagePlus, Boxes, Nfc, FileDown, MoreVertical, Pencil, Trash2, Search } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ItemCard } from "@/components/ItemCard";
 import { AddItemSheet } from "@/components/AddItemSheet";
@@ -19,6 +19,7 @@ import * as Papa from 'papaparse';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { EditContainerDialog } from "@/components/EditContainerDialog";
 import { RemoveConfirmationDialog } from "@/components/RemoveConfirmationDialog";
+import { SearchDialog } from "@/components/SearchDialog";
 
 
 export default function ContainerPage() {
@@ -31,6 +32,7 @@ export default function ContainerPage() {
   const [isScanDialogOpen, setScanDialogOpen] = useState(false);
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isSearchDialogOpen, setSearchDialogOpen] = useState(false);
 
   const containerId = typeof params.id === 'string' ? params.id : '';
   const container = getContainerById(containerId);
@@ -135,13 +137,17 @@ export default function ContainerPage() {
                 </h1>
               </div>
               <div className="flex items-center gap-2">
-                 <Button variant="outline" size="icon" className="sm:w-auto sm:px-3" onClick={handleExport}>
+                 <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setSearchDialogOpen(true)}>
+                    <Search />
+                    <span className="sr-only">Search Items</span>
+                 </Button>
+                 <Button variant="outline" size="icon" className="h-9 w-auto px-3 hidden sm:inline-flex" onClick={handleExport}>
                   <FileDown />
-                  <span className="hidden sm:inline">Export CSV</span>
+                  <span className="ml-2">Export CSV</span>
                 </Button>
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" className="h-9 w-9">
                             <MoreVertical />
                             <span className="sr-only">More options</span>
                         </Button>
@@ -150,6 +156,10 @@ export default function ContainerPage() {
                         <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
                             <Pencil className="mr-2 h-4 w-4" />
                             <span>Edit Container</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleExport} className="flex sm:hidden">
+                          <FileDown className="mr-2 h-4 w-4" />
+                          <span>Export CSV</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)} className="text-destructive focus:text-destructive">
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -260,6 +270,7 @@ export default function ContainerPage() {
         title={`Delete "${container.name}"?`}
         description="This will permanently delete the container and all its contents. This action cannot be undone."
       />
+      <SearchDialog open={isSearchDialogOpen} onOpenChange={setSearchDialogOpen} />
     </>
   );
 }
@@ -295,5 +306,3 @@ function ContainerSkeleton() {
     </div>
   );
 }
-
-    
