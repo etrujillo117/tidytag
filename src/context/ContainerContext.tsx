@@ -18,6 +18,7 @@ interface ContainerContextType {
   removeItem: (containerId: string, itemId: string) => void;
   updateItem: (containerId: string, itemId: string, updates: Partial<Pick<Item, 'name' | 'quantity' | 'imageUrl'>>) => void;
   linkNfcTag: (containerId: string, nfcId: string) => void;
+  deleteAllData: () => void;
 }
 
 const ContainerContext = createContext<ContainerContextType | undefined>(undefined);
@@ -255,6 +256,15 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const deleteAllData = () => {
+    setContainers([]);
+    toast({
+        title: 'All Data Deleted',
+        description: 'Your containers and items have been permanently removed.',
+        variant: 'destructive',
+    });
+  };
+
 
   const value = {
     containers,
@@ -268,6 +278,7 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
     removeItem,
     updateItem,
     linkNfcTag,
+    deleteAllData,
   };
 
   return (

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Nfc, Plus, Boxes } from "lucide-react";
+import { Nfc, Plus, Boxes, MoreVertical, Trash2 } from "lucide-react";
 import { useContainer } from "@/context/ContainerContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ContainerCard } from "@/components/ContainerCard";
@@ -10,11 +10,19 @@ import { AddContainerDialog } from "@/components/AddContainerDialog";
 import { ScanTagDialog } from "@/components/ScanTagDialog";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { DeleteAllDialog } from "@/components/DeleteAllDialog";
 
 export default function Home() {
   const { containers, loading } = useContainer();
   const [isAddDialogOpen, setAddDialogOpen] = useState(false);
   const [isScanDialogOpen, setScanDialogOpen] = useState(false);
+  const [isDeleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
 
   const rootContainers = containers.filter(c => !c.parentId);
 
@@ -40,6 +48,20 @@ export default function Home() {
                   <Plus />
                   <span className="hidden sm:inline">New Container</span>
                 </Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-9 w-9">
+                            <MoreVertical />
+                            <span className="sr-only">More options</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setDeleteAllDialogOpen(true)} className="text-destructive focus:text-destructive">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Delete All Data</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>
@@ -90,6 +112,7 @@ export default function Home() {
       </div>
       <AddContainerDialog open={isAddDialogOpen} onOpenChange={setAddDialogOpen} />
       <ScanTagDialog open={isScanDialogOpen} onOpenChange={setScanDialogOpen} />
+      <DeleteAllDialog open={isDeleteAllDialogOpen} onOpenChange={setDeleteAllDialogOpen} />
     </>
   );
 }
