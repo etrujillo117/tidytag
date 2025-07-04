@@ -36,7 +36,7 @@ export function ItemCard({ item, containerId }: ItemCardProps) {
             />
           </div>
           <div className="p-4">
-            <CardTitle className="text-lg truncate font-headline">{item.name}</CardTitle>
+            <CardTitle className="text-lg font-headline break-words">{item.name}</CardTitle>
             <CardDescription className="pt-1">Quantity: {item.quantity}</CardDescription>
              <CardDescription className="pt-1 text-xs">Added {formattedDate}</CardDescription>
           </div>

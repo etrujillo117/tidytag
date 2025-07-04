@@ -19,7 +19,12 @@ import { useContainer } from "@/context/ContainerContext";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Container name is required").max(50, "Name must be 50 characters or less"),
+  name: z.string()
+    .min(1, "Container name is required")
+    .max(18, "Name must be 18 characters or less")
+    .regex(/^[a-zA-Z0-9\s.,_&()#@!'-]+$/, {
+      message: "Name can only contain letters, numbers, spaces, and simple symbols.",
+    }),
   allowedContentType: z.enum(["items", "containers"]),
 });
 

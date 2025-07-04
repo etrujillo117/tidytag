@@ -27,7 +27,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const formSchema = z.object({
-  name: z.string().min(1, "Item name is required").max(50, "Name must be 50 characters or less"),
+  name: z.string()
+    .min(1, "Item name is required")
+    .max(18, "Name must be 18 characters or less")
+    .regex(/^[a-zA-Z0-9\s.,_&()#@!'-]+$/, {
+      message: "Name can only contain letters, numbers, spaces, and simple symbols.",
+    }),
   quantity: z.coerce.number().int().min(1, "Quantity must be at least 1"),
 });
 

@@ -34,8 +34,8 @@ export function ContainerCard({ container }: ContainerCardProps) {
                 )}
               </div>
             </div>
-            <div className="flex-grow">
-              <CardTitle className="truncate font-headline">{container.name}</CardTitle>
+            <div className="flex-grow min-w-0">
+              <CardTitle className="font-headline break-words">{container.name}</CardTitle>
               <CardDescription className="flex items-center gap-1.5 pt-1">
                  {container.allowedContentType === 'items' ? (
                   <>
