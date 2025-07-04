@@ -12,7 +12,7 @@ import { ItemCard } from "@/components/ItemCard";
 import { AddItemSheet } from "@/components/AddItemSheet";
 import { AddContainerDialog } from "@/components/AddContainerDialog";
 import { ContainerCard } from "@/components/ContainerCard";
-import { LinkNfcDialog } from "@/components/LinkNfcDialog";
+import { ScanTagDialog } from "@/components/ScanTagDialog";
 import type { Container } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import * as Papa from 'papaparse';
@@ -28,7 +28,7 @@ export default function ContainerPage() {
   const { toast } = useToast();
   const [isAddItemSheetOpen, setAddItemSheetOpen] = useState(false);
   const [isAddContainerDialogOpen, setAddContainerDialogOpen] = useState(false);
-  const [isLinkNfcDialogOpen, setLinkNfcDialogOpen] = useState(false);
+  const [isScanDialogOpen, setScanDialogOpen] = useState(false);
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -213,8 +213,8 @@ export default function ContainerPage() {
             variant="secondary"
             size="icon"
             className="rounded-full h-14 w-14 shadow-lg"
-            onClick={() => setLinkNfcDialogOpen(true)}
-            aria-label="Link NFC Tag"
+            onClick={() => setScanDialogOpen(true)}
+            aria-label="Scan Tag"
         >
             <Nfc className="h-6 w-6" />
         </Button>
@@ -244,10 +244,9 @@ export default function ContainerPage() {
         onOpenChange={setAddContainerDialogOpen}
         parentId={container.id}
       />
-      <LinkNfcDialog 
-        open={isLinkNfcDialogOpen}
-        onOpenChange={setLinkNfcDialogOpen}
-        container={container}
+      <ScanTagDialog 
+        open={isScanDialogOpen}
+        onOpenChange={setScanDialogOpen}
       />
       <EditContainerDialog
         open={isEditDialogOpen}
