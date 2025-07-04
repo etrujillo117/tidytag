@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import {Toaster} from '@/components/ui/toaster';
 import {ContainerProvider} from '@/context/ContainerContext';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
   title: 'TidyTag',
@@ -24,10 +25,17 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <ContainerProvider>
-          {children}
-          <Toaster />
-        </ContainerProvider>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+          <ContainerProvider>
+            {children}
+            <Toaster />
+          </ContainerProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

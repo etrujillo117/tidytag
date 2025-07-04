@@ -9,6 +9,7 @@ import { ContainerCard } from "@/components/ContainerCard";
 import { AddContainerDialog } from "@/components/AddContainerDialog";
 import { ScanTagDialog } from "@/components/ScanTagDialog";
 import { Logo } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Home() {
   const { containers, loading } = useContainer();
@@ -28,6 +29,7 @@ export default function Home() {
                 </h1>
               </div>
               <div className="flex items-center gap-2">
+                <ThemeToggle />
                 <Button size="sm" onClick={() => setScanDialogOpen(true)}>
                   <Nfc className="mr-2 h-4 w-4" />
                   Scan Tag
