@@ -112,7 +112,7 @@ export default function ContainerPage() {
 
   return (
     <>
-      <div className="min-h-screen">
+      <div className="min-h-screen pb-32">
         <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
@@ -127,21 +127,6 @@ export default function ContainerPage() {
                   <FileDown />
                   <span className="hidden sm:inline">Export CSV</span>
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setLinkNfcDialogOpen(true)}>
-                  <Nfc />
-                  <span className="hidden sm:inline">{container.nfcId ? 'Edit' : 'Link'} Tag</span>
-                </Button>
-                {container.allowedContentType === 'items' ? (
-                  <Button size="sm" onClick={() => setAddItemSheetOpen(true)}>
-                    <Plus />
-                    <span className="hidden sm:inline">Add Item</span>
-                  </Button>
-                ) : (
-                  <Button size="sm" onClick={() => setAddContainerDialogOpen(true)}>
-                    <Boxes />
-                    <span className="hidden sm:inline">New Sub-Container</span>
-                  </Button>
-                )}
               </div>
             </div>
           </div>
@@ -192,6 +177,33 @@ export default function ContainerPage() {
           )}
         </main>
       </div>
+
+      <div className="fixed bottom-6 right-6 z-20 flex flex-col items-center gap-4">
+        <Button 
+            variant="secondary"
+            size="icon"
+            className="rounded-full h-14 w-14 shadow-lg"
+            onClick={() => setLinkNfcDialogOpen(true)}
+            aria-label="Link NFC Tag"
+        >
+            <Nfc className="h-6 w-6" />
+        </Button>
+        <Button 
+            size="icon"
+            className="rounded-full h-16 w-16 shadow-lg"
+            onClick={() => {
+                if (container.allowedContentType === 'items') {
+                    setAddItemSheetOpen(true);
+                } else {
+                    setAddContainerDialogOpen(true);
+                }
+            }}
+            aria-label={container.allowedContentType === 'items' ? "Add New Item" : "Add New Sub-Container"}
+        >
+            <Plus className="h-8 w-8" />
+        </Button>
+      </div>
+
       <AddItemSheet
         open={isAddItemSheetOpen}
         onOpenChange={setAddItemSheetOpen}
