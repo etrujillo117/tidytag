@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -5,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useContainer } from "@/context/ContainerContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, PackageOpen, PackagePlus, Boxes, Nfc, FileDown } from "lucide-react";
+import { ArrowLeft, Plus, PackageOpen, PackagePlus, Boxes, Nfc, FileDown, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ItemCard } from "@/components/ItemCard";
 import { AddItemSheet } from "@/components/AddItemSheet";
@@ -15,16 +16,21 @@ import { LinkNfcDialog } from "@/components/LinkNfcDialog";
 import type { Container } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import * as Papa from 'papaparse';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { EditContainerDialog } from "@/components/EditContainerDialog";
+import { RemoveConfirmationDialog } from "@/components/RemoveConfirmationDialog";
 
 
 export default function ContainerPage() {
   const params = useParams();
   const router = useRouter();
-  const { getContainerById, getChildContainers, loading, containers } = useContainer();
+  const { getContainerById, getChildContainers, loading, containers, removeContainer } = useContainer();
   const { toast } = useToast();
   const [isAddItemSheetOpen, setAddItemSheetOpen] = useState(false);
   const [isAddContainerDialogOpen, setAddContainerDialogOpen] = useState(false);
   const [isLinkNfcDialogOpen, setLinkNfcDialogOpen] = useState(false);
+  const [isEditDialogOpen, setEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const containerId = typeof params.id === 'string' ? params.id : '';
   const container = getContainerById(containerId);
@@ -92,6 +98,12 @@ export default function ContainerPage() {
       </div>
     );
   }
+  
+  const handleRemoveContainer = () => {
+    if (!container) return;
+    removeContainer(container.id);
+    router.push('/');
+  }
 
   const parentContainer = container.parentId ? getContainerById(container.parentId) : null;
   const breadcrumbs = parentContainer ? (
@@ -123,10 +135,28 @@ export default function ContainerPage() {
                 </h1>
               </div>
               <div className="flex items-center gap-2">
-                 <Button variant="outline" size="sm" onClick={handleExport}>
+                 <Button variant="outline" size="icon" className="sm:w-auto sm:px-3" onClick={handleExport}>
                   <FileDown />
                   <span className="hidden sm:inline">Export CSV</span>
                 </Button>
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <MoreVertical />
+                            <span className="sr-only">More options</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            <span>Edit Container</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)} className="text-destructive focus:text-destructive">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Delete Container</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>
@@ -219,6 +249,18 @@ export default function ContainerPage() {
         onOpenChange={setLinkNfcDialogOpen}
         container={container}
       />
+      <EditContainerDialog
+        open={isEditDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        container={container}
+      />
+      <RemoveConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleRemoveContainer}
+        title={`Delete "${container.name}"?`}
+        description="This will permanently delete the container and all its contents. This action cannot be undone."
+      />
     </>
   );
 }
@@ -254,3 +296,5 @@ function ContainerSkeleton() {
     </div>
   );
 }
+
+    

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
@@ -14,6 +15,7 @@ interface ContainerContextType {
   getChildContainers: (parentId: string) => Container[];
   addContainer: (name: string, allowedContentType: 'items' | 'containers', parentId?: string) => void;
   removeContainer: (id: string) => void;
+  updateContainer: (id: string, updates: Partial<Pick<Container, 'name' | 'nfcId'>>) => void;
   addItem: (containerId: string, itemData: { name: string; quantity: number, imageUrl?: string }) => void;
   removeItem: (containerId: string, itemId: string) => void;
   updateItem: (containerId: string, itemId: string, updates: Partial<Pick<Item, 'name' | 'quantity' | 'imageUrl'>>, updateDate?: boolean) => void;
@@ -160,6 +162,33 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const updateContainer = (id: string, updates: Partial<Pick<Container, 'name' | 'nfcId'>>) => {
+    if (updates.nfcId) {
+      const tagExists = containers.some(c => c.nfcId === updates.nfcId && c.id !== id);
+      if (tagExists) {
+        toast({
+          title: 'NFC Tag In Use',
+          description: 'This NFC tag ID is already assigned to another container.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
+    let containerName = '';
+    setContainers(prev => prev.map(c => {
+      if (c.id === id) {
+        containerName = updates.name || c.name;
+        return { ...c, ...updates, updatedAt: new Date().toISOString() };
+      }
+      return c;
+    }));
+    toast({
+      title: 'Container Updated',
+      description: `"${containerName}" has been updated successfully.`,
+    });
+  };
+
   const addItem = (containerId: string, itemData: { name: string; quantity: number, imageUrl?: string }) => {
     const container = getContainerById(containerId);
     if (container?.allowedContentType !== 'items') {
@@ -286,6 +315,7 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
     getChildContainers,
     addContainer,
     removeContainer,
+    updateContainer,
     addItem,
     removeItem,
     updateItem,
@@ -299,3 +329,5 @@ export const ContainerProvider = ({ children }: { children: ReactNode }) => {
     </ContainerContext.Provider>
   );
 };
+
+    

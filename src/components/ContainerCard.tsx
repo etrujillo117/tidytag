@@ -1,14 +1,16 @@
+
 "use client";
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MoreVertical, Trash2, Box, Package, Boxes } from 'lucide-react';
+import { MoreVertical, Trash2, Box, Package, Boxes, Pencil } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { RemoveConfirmationDialog } from '@/components/RemoveConfirmationDialog';
 import { useContainer } from '@/context/ContainerContext';
 import type { Container } from '@/lib/types';
+import { EditContainerDialog } from './EditContainerDialog';
 
 interface ContainerCardProps {
   container: Container;
@@ -17,6 +19,7 @@ interface ContainerCardProps {
 export function ContainerCard({ container }: ContainerCardProps) {
   const { removeContainer, containers } = useContainer();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isEditDialogOpen, setEditDialogOpen] = useState(false);
 
   const childContainers = containers.filter(c => c.parentId === container.id);
 
@@ -61,6 +64,10 @@ export function ContainerCard({ container }: ContainerCardProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+               <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                <span>Edit</span>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)} className="text-destructive focus:text-destructive">
                 <Trash2 className="mr-2 h-4 w-4" />
                 <span>Delete</span>
@@ -76,6 +83,13 @@ export function ContainerCard({ container }: ContainerCardProps) {
         title={`Delete "${container.name}"?`}
         description="This will permanently delete the container and all its contents. This action cannot be undone."
       />
+      <EditContainerDialog
+        open={isEditDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        container={container}
+      />
     </>
   );
 }
+
+    
