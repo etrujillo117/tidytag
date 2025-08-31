@@ -39,10 +39,11 @@ export function QrCodeDialog({ open, onOpenChange, container }: QrCodeDialogProp
         const printWindow = window.open('', '', 'height=600,width=800');
         if (printWindow) {
             printWindow.document.write('<html><head><title>Print QR Code</title>');
-            printWindow.document.write('<style>@media print { @page { size: auto; margin: 0; } body { margin: 1cm; text-align: center; } } body { font-family: sans-serif; text-align: center; margin-top: 50px; } h1 { font-size: 24px; }</style>');
+            printWindow.document.write('<style>@media print { @page { size: auto; margin: 0; } body { margin: 1cm; text-align: center; } } body { font-family: sans-serif; text-align: center; margin-top: 50px; } h1 { font-size: 24px; margin-bottom: 1rem; } p { font-family: monospace; font-size: 12px; margin-top: 0.5rem; word-break: break-all;}</style>');
             printWindow.document.write('</head><body>');
             printWindow.document.write(`<h1>${container.name}</h1>`);
             printWindow.document.write(`<img src="${dataUrl}" style="width:300px; height:300px;" />`);
+            printWindow.document.write(`<p>${containerUrl}</p>`);
             printWindow.document.write('</body></html>');
             printWindow.document.close();
             printWindow.focus();
