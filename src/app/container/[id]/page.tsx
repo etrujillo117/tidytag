@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useContainer } from "@/context/ContainerContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, PackageOpen, PackagePlus, Boxes, Nfc, FileDown, MoreVertical, Pencil, Trash2, Search } from "lucide-react";
+import { ArrowLeft, Plus, PackageOpen, PackagePlus, Boxes, Nfc, FileDown, MoreVertical, Pencil, Trash2, Search, QrCode } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ItemCard } from "@/components/ItemCard";
 import { AddItemSheet } from "@/components/AddItemSheet";
@@ -20,6 +20,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { EditContainerDialog } from "@/components/EditContainerDialog";
 import { RemoveConfirmationDialog } from "@/components/RemoveConfirmationDialog";
 import { SearchDialog } from "@/components/SearchDialog";
+import { QrCodeDialog } from "@/components/QrCodeDialog";
 
 
 export default function ContainerPage() {
@@ -33,6 +34,7 @@ export default function ContainerPage() {
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isSearchDialogOpen, setSearchDialogOpen] = useState(false);
+  const [isQrCodeDialogOpen, setQrCodeDialogOpen] = useState(false);
 
   const containerId = typeof params.id === 'string' ? params.id : '';
   const container = getContainerById(containerId);
@@ -157,6 +159,10 @@ export default function ContainerPage() {
                             <Pencil className="mr-2 h-4 w-4" />
                             <span>Edit Container</span>
                         </DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => setQrCodeDialogOpen(true)}>
+                            <QrCode className="mr-2 h-4 w-4" />
+                            <span>Show QR Code</span>
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleExport} className="flex sm:hidden">
                           <FileDown className="mr-2 h-4 w-4" />
                           <span>Export CSV</span>
@@ -271,6 +277,11 @@ export default function ContainerPage() {
         description="This will permanently delete the container and all its contents. This action cannot be undone."
       />
       <SearchDialog open={isSearchDialogOpen} onOpenChange={setSearchDialogOpen} />
+      <QrCodeDialog
+        open={isQrCodeDialogOpen}
+        onOpenChange={setQrCodeDialogOpen}
+        container={container}
+      />
     </>
   );
 }
