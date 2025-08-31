@@ -86,7 +86,7 @@ export function QrCodeDialog({ open, onOpenChange, container }: QrCodeDialogProp
            </p>
         </div>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onChange(false)}>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Close
           </Button>
           <Button type="button" onClick={handlePrint}>
@@ -98,3 +98,4 @@ export function QrCodeDialog({ open, onOpenChange, container }: QrCodeDialogProp
     </Dialog>
   );
 }
+
