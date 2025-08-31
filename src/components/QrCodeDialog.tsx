@@ -31,22 +31,27 @@ export function QrCodeDialog({ open, onOpenChange, container }: QrCodeDialogProp
     }, [container.id]);
 
     const handlePrint = () => {
+        const canvas = document.getElementById('qr-code-canvas') as HTMLCanvasElement;
+        if (!canvas) return;
+
+        const dataUrl = canvas.toDataURL();
+        
         const printWindow = window.open('', '', 'height=600,width=800');
         if (printWindow) {
             printWindow.document.write('<html><head><title>Print QR Code</title>');
-            printWindow.document.write('<style>body { font-family: sans-serif; text-align: center; margin-top: 50px; } canvas { width: 300px !important; height: 300px !important; } h1 { font-size: 24px; }</style>');
+            printWindow.document.write('<style>@media print { @page { size: auto; margin: 0; } body { margin: 1cm; text-align: center; } } body { font-family: sans-serif; text-align: center; margin-top: 50px; } h1 { font-size: 24px; }</style>');
             printWindow.document.write('</head><body>');
-            const canvas = document.getElementById('qr-code-canvas') as HTMLCanvasElement;
-            if (canvas) {
-                const dataUrl = canvas.toDataURL();
-                printWindow.document.write(`<h1>${container.name}</h1>`);
-                printWindow.document.write(`<img src="${dataUrl}" style="width:300px; height:300px;" />`);
-            }
+            printWindow.document.write(`<h1>${container.name}</h1>`);
+            printWindow.document.write(`<img src="${dataUrl}" style="width:300px; height:300px;" />`);
             printWindow.document.write('</body></html>');
             printWindow.document.close();
             printWindow.focus();
-            printWindow.print();
-            printWindow.close();
+            
+            // Wait for image to load before printing
+            printWindow.onload = function() {
+                printWindow.print();
+                printWindow.close();
+            };
         }
     };
 
@@ -70,6 +75,10 @@ export function QrCodeDialog({ open, onOpenChange, container }: QrCodeDialogProp
                 size={256}
                 level="H" 
                 className="rounded-lg"
+                imageSettings={{
+                    // This can help with some browser rendering issues
+                    excavate: true,
+                }}
               />
            )}
            <p className="text-sm text-muted-foreground text-center">
@@ -77,7 +86,7 @@ export function QrCodeDialog({ open, onOpenChange, container }: QrCodeDialogProp
            </p>
         </div>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button type="button" variant="outline" onClick={() => onChange(false)}>
             Close
           </Button>
           <Button type="button" onClick={handlePrint}>
