@@ -28,7 +28,3 @@ It's built with Next.js and Tailwind CSS, and it runs entirely in your browser, 
     - **By Scanning a Tag:** For NFC, tap the floating NFC button and hold your device near the tag. For QR codes, just open your phone's camera and point it at the code. You'll be instantly redirected to the container's page.
     - **By Searching:** Tap the search icon in the header on any page. Start typing an item's name to see a list of results showing what container it's in.
     - **By Browsing:** Simply navigate through your created containers and sub-containers.
-
----
-
-This project was generated in **Firebase Studio**.
